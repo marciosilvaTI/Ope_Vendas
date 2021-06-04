@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+    {% block title %}
+        MS - Orfeu
+    {% endblock title %}
+    </title>
+
+
+    <link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap.min.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/vendas.css')}}">
+    <script src="{{ url_for('static', filename='js/jquery.js')}}"></script>
+
+</head>
+<body onload="formataMoeda()">
+
+    <div class="container2" style align="center">
+
+
+<header>
+    <nav>
+        <!-- Se clicar em Concluir Venda devemos abrir o modal de pagamento -->
+            <!-- <li><a class="fill" href="/concluir_venda">Concluir Venda</a></li> -->
+            <li><a class="fill" href="/concluir_venda">{{venda.id}}</a></li>
+
+
+            <li>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#concluir_venda">
+                Concluir Venda
+              </button>
+            </li>
+            <!-- Se clicar em Incluir Cliente devemos abrir o modal de clientes cadastrados -->
+            <!-- <li><a class="fill" href="/incluir_cliente">Incluir Cliente</a></li> -->
+<!-- 
+            <li>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#incluir_cliente">
+                Incluir Cliente
+              </button>
+            </li> -->
+            <li>
+
+              <!-- <input type="hidden" id="idCliente" name="idCliente"> -->
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#incluir_cliente">
+                Incluir Cliente
+              </button>
+            </li>
+
+
+
+
+
+
+            <!-- Se clicar em Incluir Desconto devemos abrir o modal de aplicar desconto na venda -->
+            <li><a class="fill" href="/incluir_desconto_venda">Incluir Desconto</a></li>
+            <!-- Se clicar em Cancelar Venda devemos abrir o modal para confirmar cancelamentoa -->
+            <li><a class="fill" href="/deletar_venda/{{venda.id}}">Cancelar Venda</a></li>
+    </nav>
+</header>
+
+
+
+<div class="modal fade" id="concluir_venda" tabindex="-1" role="dialog" aria-labelledby="concluir_vendaLabel"
+aria-hidden="true">
+<div class="modal-dialog" role="document">
+<div class="modal-content">
+  <div class="modal-header">
+    <h5 class="modal-title" id="concluir_vendaLabel">Pagamento</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-header">
+    <p>Total a Pagar</p>
+    <input type="text" value="{{venda.valor_total}}" disabled>
+  </div>
+
+
+  <div class="modal-body">
+
+
+    <form action="#" method="POST">
+
+
+        {% for tipo_pag in tipo_pagamentos %}
+        <div class="modal-header">
+          <p>{{tipo_pag.tipo_pagamento}}</p>
+          <input type="text" value="" id={{tipo_pag.tipo_pagamento}} name={{tipo_pag.tipo_pagamento}}>
+          </div>
+        {% endfor %}
+
+        <div class="modal-header">
+        <p>Deixar em débito (Fiado)</p>
+        <input type="checkbox" id="scales" name="scales">
+      </div>
+
+      <div class="modal-header">
+        <p></p>
+        <input type="text" value="" disabled>
+      </div>
+
+      <div class="modal-header">
+        <p>Imprimir</p>
+        <input type="checkbox" id="scales" name="scales">
+      </div>
+
+
+
+      <button type="submit" class="btn btn-primary" onclick="pega_valor()">Salvar</button>
+      <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+    </form>
+
+
+  </div>
+  <!-- <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+    <button type="submit" class="btn btn-primary">Adicionar Categoria</button>
+  </div> -->
+</div>
+</div>
+
+
+
+
+</div>
+<!-- *********************************************************************************************************************** -->
+
+
+
+<!-- Button trigger modal
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#incluir_cliente">
+    Launch demo modal
+  </button>
+   -->
+
+
+   <input type="hidden" id="idCliente" name="idCliente">
+   <input type="hidden" id="id_venda" name="id_venda" value="{{venda.id}}">
+   <!-- <button type="button" class="btn btn-primary edit" data-toggle="modal" data-target="#incluir_cliente" onclick="setaDadosModal(93, 25)">
+       Incluir Cliente
+     </button>
+   </li> -->
+
+
+
+
+  <!-- Modal -->
+  <div class="modal fade" id="incluir_cliente" tabindex="-1" role="dialog" aria-labelledby="incluir_clienteLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="incluir_clienteLabel">Selecione um cliente</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+
+            <!-- Devemos colocar as informações do cliente em um scrool -->
+            <table border="1" width="70%" class="table table-striped">
+
+              <input type="text" placeholder="Localize por nome, código ou telefone!">
+              <button>Procurar</button>
+
+                <thead>
+                  <tr>
+                    <th class="fill2">NOME</th>
+                    <th class="fill2">CÓDIGO</th>
+                    <th class="fill2">VALOR DA DÍVIDA</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for c in clientes %}
+                  <tr>
+                    <td>{{c.nome}}</td>
+                    <td>{{c.id}}</td>
+                    <td class="valor">{{c.valor_divida}}</td>
+           
+                <td>      
+   <button type="button" class="btn btn-primary add_cliente" onclick="AdicionarClienteNaVenda('{{c.id}}')">
+       Incluir Cliente
+     </button>
+    </td>
+            
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+              
+        </div>
+
+        <div class="modal-footer">
+
+<!-- 
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button> -->
+
+
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+
+<div class="container3">
+  <input id="nome_codigo_produto" type="text" placeholder="Código de barra" onchange="buscar_produto()">
+
+  <input id="qtd_produto" type="number" placeholder="Quantidade" onchange="alterar_preco()">
+
+  <input id="preco_iten" type="text" placeholder="Preço" disabled>
+
+  <input id="total_itens" type="text" placeholder="Total" disabled>
+
+  <input id="valor_desconto" type="text" placeholder="Desconto">
+
+  <button type="button" class="btn btn-primary">
+    Incluir produto na lista
+  </button>
+</div>
+
+
+<div id="lista_vendas">
+
+  <table class="table tabela-venda">
+    <thead>
+    <tr>
+        <th scope="col">#</th>                                    
+        <th scope="col">Descrição</th>
+        <th scope="col">Qtd x Valor</th>
+        <th scope="col">Total</th>
+
+        <td>
+          <a class="delet" href="/deletar_produto/1"> <!--Mudar rota-->
+            <img src="{{url_for('static', filename='images/remover.png')}}">
+          </a>
+        </td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th scope="row">Alterar back</th>
+        <td>Descrição</td>
+        <td>Vl. Unitário</td>
+        <td>Quantidade</td>
+        <td>Desconto</td>
+        <td>Total</td>
+    </tr>
+    </tbody>
+</table>
+
+</div>
+
+
+
+
+  <script>
+    // A variavel abaixo guardará o valor do desconto do produto
+    var valor_desconto_bd = 0
+
+    // Mudar o nome da função setaDadosModal
+    function AdicionarClienteNaVenda(id_cliente) {
+      id_venda = document.getElementById('id_venda').value
+      //alert(id_cliente + "" + id_venda)
+      data={ 
+        "id_venda": id_venda,
+        "id_cliente": id_cliente
+   };
+
+      data = JSON.stringify(data)
+      document.getElementById('idCliente').value = data;
+    }
+
+    $(".add_cliente").click(function () {
+      route = "/adicionar_cliente/" + document.getElementById('idCliente').value;
+      $.get(route, function (retorno) {
+        var obj = JSON.parse(retorno);
+        // Precisamos arrumar para que a mensagem só apareça quando clicarmos no botão adicionar que estar dentro do modal
+        if (obj.teste == 1){
+          alert("Cliente adicionado na venda")
+        }
+       $('#AdicionarCliente').attr('action', route);
+      });
+    });
+
+
+
+
+ /*   function buscar_produto() {
+      nome_codigo_produto = document.getElementById('nome_codigo_produto')
+      alert(nome_codigo_produto.value)
+      nome_codigo_produto.value = "Teste"
+      alert(nome_codigo_produto.value)
+}*/
+
+function buscar_produto() {
+
+  nome_codigo_produto = document.getElementById('nome_codigo_produto')
+
+  data={ 
+        "nome_codigo_produto": nome_codigo_produto.value
+   };
+
+   data = JSON.stringify(data)
+      
+      route = "/buscar_produto/" + data
+      
+      $.get(route, function (retorno) {
+        var obj = JSON.parse(retorno);
+        if (obj.codigo_barras != 0){
+          valor_desconto_bd = obj.valor_desconto
+
+          qtd_produto = document.getElementById('qtd_produto')
+          preco_iten = document.getElementById('preco_iten')
+          total_itens = document.getElementById('total_itens')
+          valor_desconto = document.getElementById('valor_desconto')
+
+          nome_codigo_produto.value = obj.descricao_produto
+          preco_iten.value = obj.preco_venda
+          valor_desconto.value = obj.valor_desconto
+          total_itens.value = obj.preco_venda
+          alterar_preco()
+          // alert(obj.codigo_barras)
+          // alert(obj.descricao_produto)
+          // alert(obj.preco_venda)
+          // alert(obj.valor_desconto)
+        }
+        else{
+          alert("Produto não encontrado!")
+        }
+      });
+}
+
+
+
+
+function alterar_preco() {
+  total_itens.value = qtd_produto.value * preco_iten.value 
+  valor_desconto.value = qtd_produto.value  * valor_desconto_bd
+
+}
+
+
+
+
+function zerar_variaveis() {
+  valor_desconto_bd = ""
+  nome_codigo_produto.value = ""
+  preco_iten.value = ""
+  valor_desconto.value = ""
+  total_itens.value = ""
+
+}
+
+
+
+  </script>
+
+
+  
+
+
+
+
+
+  <script src="{{ url_for('static', filename='js/bootstrap.min.js')}}"></script>
+  <script src="{{ url_for('static', filename='js/scripts.js')}}"></script>
+  <script src="{{ url_for('static', filename='js/jquery.js')}}"></script>
+  <script src="{{ url_for('static', filename='js/popper.js')}}"></script>
+</body>
+</html>

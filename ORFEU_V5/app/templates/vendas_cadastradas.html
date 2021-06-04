@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+{{ super() }} - Vendas Cadastradas
+{% endblock title %}
+
+
+{% block main %}
+
+<div class="container" align="center">
+    <h1 align="center" class="fill2">Vendas Cadastradas</h1>
+    <table border="1" width="70%" class="table table-striped">
+        <thead>
+            <tr>
+                <th class="fill2">Data da venda</th>
+                <th class="fill2">Valor Total</th>
+                <th class="fill2">Valor Desconto</th>
+                <th class="fill2">Código Status</th>
+                <th class="fill2">Id Usuário</th>
+                <th class="fill2">Id Cliente</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <!-- u = usuario -->
+            {% for v in vendas %}
+            <tr>
+                <td>{{v.data_venda}}</td>
+                <td>{{v.valor_total}}</td>
+                <td>{{v.valor_desconto}}</td>
+                <td>{{v.cod_status_venda}}</td>
+                <td>{{v.id_usuario_id}}</td>
+                <td>{{v.id_cliente_id}}</td>
+                {% endfor %}
+            </tbody>
+    </table>
+{% endblock main %}

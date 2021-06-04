@@ -1,0 +1,34 @@
+o input do código de barras no modal não está funcionando (Na hora de editar o produto)
+
+Colocar a função de alterar para maiúscula os nomes das categorias
+
+Exibir mensagens sempre que adicionar, editar ou deletar um objeto.
+
+Padronizar tenxtos no sistema
+
+Como faremos a atualização do valor da dívida do cliente?
+1 - Atualizaremos automaticamente, ou seja, ele efetua um pagamento e o sistema atualiza o valor?
+2 - Essa atualização será manual?
+
+Colocar menssagem flash nas rotas
+
+Criar uma tela ou modal caso o usuário queira alterar sua senha.
+
+
+Limitar a quantidade dos caracteres em todos os inputs para que não dê erro na hora de salvar no banco. EX: telefone não pode ter mais de 11 caracteres
+
+* Criar função para inativar produto
+
+
+
+/************************************** PERGUNTAS **************************************/
+
+Por que o atributo id_cliente_id não foi colocado no init da classe venda, já que foi colocado na tabela? 
+
+Já que usaremos o cod_status_venda, podemos remover o atributo status_venda da classe StatusVenda pu vamos usá-lo em alguma parte do sistema?
+
+
+
+/************************************************************************************************/
+
+Fixar menu quando subirmos o conteúdo da tela
