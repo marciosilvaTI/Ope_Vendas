@@ -1670,7 +1670,6 @@ def adicionar_venda():
     return f"Venda adicionada {venda}"
 
 
-
 def exibir_venda(venda):
     print('venda.id: ', venda.id)
     print('venda.data_venda: ', venda.data_venda)
@@ -1682,6 +1681,7 @@ def exibir_venda(venda):
     print('venda.observacao: ', venda.observacao)
     print('venda.id_usuario_id: ', venda.id_usuario_id)
     print('venda.id_cliente_id: ', venda.id_cliente_id)
+    print('venda.id: ', venda.lista_itens)
     print(50 * "*")
 
 
@@ -2084,11 +2084,12 @@ exibir_venda(venda01)
 #*****************************************************************************************************************#
 #*****************************************************************************************************************#
 '''
-
+'''
 @app.route("/adicionar_nova_venda")
 @login_required
 def adicionar_nova_venda():
     return redirect(url_for('nova_venda_full'))
+
 
 @app.route("/nova_venda_full")
 @login_required
@@ -2099,6 +2100,34 @@ def nova_venda_full():
     tipo_pagamentos = TipoPagamento.query.all()
     clientes = Cliente.query.all()
     return render_template('nova_venda.html', venda=venda, tipo_pagamentos=tipo_pagamentos, clientes=clientes)
+'''
+
+@app.route("/adicionar_nova_venda")
+@login_required
+def adicionar_nova_venda():
+    venda = Venda(app.id_usuario)
+    db.session.add(venda)
+    db.session.commit()
+    return redirect('/nova_venda_full/'+str(venda.id))
+
+@app.route("/nova_venda_full/<int:id_venda>")
+@login_required
+def nova_venda_full(id_venda):
+    venda = Venda.query.get(id_venda)
+    tipo_pagamentos = TipoPagamento.query.all()
+    clientes = Cliente.query.all()
+    detalhes_vendas = DetalhesVenda.query.filter(DetalhesVenda.id_venda_id == venda.id).all()
+    # print(detalhes_vendas)
+    # numero_item = 0
+
+    for dv in detalhes_vendas:
+        dv.alterar_nome_produto()
+
+    # if len(detalhes_vendas) > 0 :
+    #     numero_item = detalhes_vendas[len(detalhes_vendas) - 1].numero_item
+        
+    return render_template('nova_venda.html', venda=venda, tipo_pagamentos=tipo_pagamentos, clientes=clientes, detalhes_vendas=detalhes_vendas)
+
 
 
 # @app.route("/adicionar_cliente/<int:id>", methods=['GET', 'POST'])
@@ -2150,3 +2179,72 @@ def buscar_produto(data):
     if produto != None:
         return json.dumps(produto.serialized())
     return json.dumps({"codigo_barras": 0})
+
+
+# @app.route("/adicionar_detalhes_venda/<data>", methods=['GET', 'POST'])
+# @login_required
+# def adicionar_detalhes_venda(data):
+#     obj = json.loads(data)
+#     # print(obj['qtd_produto'], obj['id_venda'], obj['id_produto'])
+#     detalhes_venda = DetalhesVenda(obj['qtd_produto'], obj['id_venda'], obj['id_produto'])
+#     db.session.add(detalhes_venda)
+#     db.session.commit()
+#     return json.dumps({"codigo_barras": 1})
+#     # detalhes_venda = DetalhesVenda(obj['nome_codigo_produto'], obj['nome_codigo_produto'], obj['nome_codigo_produto'])
+#     # db.session.add(detalhes_venda)
+#     # db.session.commit()
+#     # print("Antes de calcular o valor total dos detalhes da venda")
+#     # exibir_detalhes_venda(detalhes_venda)
+#     # detalhes_venda.calcular_valor_itens()
+#     # print("Depois de calcular o valor total dos detalhes da venda")
+#     # exibir_detalhes_venda(detalhes_venda)
+
+
+@app.route("/adicionar_detalhes_venda/<data>", methods=['GET', 'POST'])
+@login_required
+def adicionar_detalhes_venda(data):
+    obj = json.loads(data)
+    # print(obj['qtd_produto'], obj['id_venda'], obj['id_produto'])
+
+    numero_item = 1
+    detalhes_vendas = DetalhesVenda.query.filter(DetalhesVenda.id_venda_id == int(obj['id_venda'])).all()
+    if len(detalhes_vendas) > 0:
+        numero_item = (detalhes_vendas[len(detalhes_vendas) - 1].numero_item) + 1
+    detalhes_venda = DetalhesVenda(numero_item, obj['qtd_produto'], obj['id_venda'], obj['id_produto'])
+    db.session.add(detalhes_venda)
+    db.session.commit()
+    return json.dumps({"codigo_barras": 1})
+    # detalhes_venda = DetalhesVenda(obj['nome_codigo_produto'], obj['nome_codigo_produto'], obj['nome_codigo_produto'])
+    # db.session.add(detalhes_venda)
+    # db.session.commit()
+    # print("Antes de calcular o valor total dos detalhes da venda")
+    # exibir_detalhes_venda(detalhes_venda)
+    # detalhes_venda.calcular_valor_itens()
+    # print("Depois de calcular o valor total dos detalhes da venda")
+    # exibir_detalhes_venda(detalhes_venda)
+
+
+
+@app.route("/editar_item/<id>", methods=['GET', 'POST'])
+@login_required
+def editar_item(id):
+    print(id, " Peguei o id")
+    detalhesVenda = DetalhesVenda.query.get(id)
+    return json.dumps(detalhesVenda.serialized())
+    # nome_codigo_produto = obj['nome_codigo_produto'].upper()
+    # produto = Produto.query.filter(db.or_(Produto.codigo_barras == nome_codigo_produto, Produto.descricao_produto == nome_codigo_produto)).first()
+    # if produto != None:
+    #     return json.dumps(produto.serialized())
+    # return json.dumps({"codigo_barras": 0})
+
+
+@app.route("/deletar_item/<int:id>", methods=['GET', 'POST'])
+@login_required
+def deletar_item(id):
+    print(id, " Cheguei")
+    detalhesVenda = DetalhesVenda.query.get(id)
+    if detalhesVenda:
+        db.session.delete(detalhesVenda)
+        db.session.commit()
+        return json.dumps({"msg": "item deletado com sucesso!"})
+    return json.dumps({"msg": 0})

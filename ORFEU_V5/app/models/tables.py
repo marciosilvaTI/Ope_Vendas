@@ -325,7 +325,6 @@ class Cliente(db.Model):
             'observacao': self.observacao,
         }
 
-
     def __repr__(self):
         return "<Cliente %r>" % self.id
 
@@ -445,6 +444,7 @@ class Produto(db.Model):
 
     def serialized(self):
         return {
+            'id': self.id,
             'codigo_barras': self.codigo_barras,
             'descricao_produto': self.descricao_produto,
             'quantidade_produto': self.quantidade_produto,
@@ -496,6 +496,7 @@ class Venda(db.Model):
         self.observacao = None
         self.id_usuario_id = id_usuario_id
         self.id_cliente_id = None
+
         # self.troca = ""
         # self.devolucao = ""
 
@@ -546,7 +547,8 @@ class Venda(db.Model):
 
     # Talvez possamos juntar as funções calcular_valor_venda_sem_desconto e calcular_descontos
     def calcular_valor_venda_sem_desconto(self):
-        detalhes_vendas = DetalhesVenda.query.filter(DetalhesVenda.id_venda_id == self.id)
+        detalhes_vendas = DetalhesVenda.query.filter(
+            DetalhesVenda.id_venda_id == self.id)
         soma = 0
         for detalhe_venda in detalhes_vendas:
             soma += detalhe_venda.quantidade_produto * detalhe_venda.valor_produto
@@ -555,10 +557,12 @@ class Venda(db.Model):
         return soma
 
     def calcular_descontos(self):
-        detalhes_vendas = DetalhesVenda.query.filter(DetalhesVenda.id_venda_id == self.id)
+        detalhes_vendas = DetalhesVenda.query.filter(
+            DetalhesVenda.id_venda_id == self.id)
         soma = 0
         for detalhe_venda in detalhes_vendas:
-            soma += (detalhe_venda.quantidade_produto * detalhe_venda.valor_desconto_produto) + detalhe_venda.valor_desconto_adicional
+            soma += (detalhe_venda.quantidade_produto *
+                     detalhe_venda.valor_desconto_produto) + detalhe_venda.valor_desconto_adicional
         valor_total_desconto = soma + self.valor_desconto
         valor_total_desconto = round(valor_total_desconto, 2)
         return valor_total_desconto
@@ -569,7 +573,6 @@ class Venda(db.Model):
 
 # valor_total_desconto = desconto_detalhes_venda_01 + desconto_detalhes_venda_02 + desconto_detalhes_venda_04
 # print(valor_total_desconto + venda01.valor_desconto)
-
 
     def alterar_observacao(self, observacao):
         self.observacao = observacao
@@ -583,7 +586,7 @@ class Venda(db.Model):
 class DetalhesVenda(db.Model):
     __tablename__ = "detalhes_venda"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # numero_item = db.Column(db.Integer, nullable=False)
+    numero_item = db.Column(db.Integer, nullable=False)
     quantidade_produto = db.Column(db.Integer, nullable=False)
     # descricao_produto = db.Column(db.String(50))
     valor_produto = db.Column(db.Float(2, 0))
@@ -605,8 +608,11 @@ class DetalhesVenda(db.Model):
         db.Integer, db.ForeignKey("produto.id"), nullable=False)
     produto = db.relationship('Produto')
 
-    def __init__(self, quantidade_produto, id_venda_id, id_produto_id):
+    nome_produto = ""
+
+    def __init__(self, numero_item, quantidade_produto, id_venda_id, id_produto_id):
         produto = Produto.query.get(id_produto_id)
+        self.numero_item = numero_item
         self.quantidade_produto = quantidade_produto
         self.valor_produto = produto.preco_venda
         self.valor_desconto_produto = produto.valor_desconto
@@ -625,8 +631,10 @@ class DetalhesVenda(db.Model):
         # db.session.commit()
         # self.calcular_valor_itens()
     # OK
+
     def calcular_valor_itens(self):
-        valor_total = (self.quantidade_produto * (self.valor_produto - self.valor_desconto_produto))
+        valor_total = (self.quantidade_produto *
+                       (self.valor_produto - self.valor_desconto_produto))
         valor_total = round(valor_total, 2)
         return valor_total
         # db.session.add(self)
@@ -653,6 +661,24 @@ class DetalhesVenda(db.Model):
     #     self.valor_desconto = valor
     #     db.session.add(self)
     #     db.session.commit()
+
+    def alterar_nome_produto(self):
+        produto = Produto.query.get(self.id_produto_id)
+        self.nome_produto = produto.descricao_produto
+
+
+
+    def serialized(self):
+        self.alterar_nome_produto()
+        return {
+            'id': self.id,
+            'nome_produto': self.nome_produto,
+            'quantidade_produto': self.quantidade_produto,
+            'valor_produto': self.valor_produto,
+            'valor_desconto_produto': self.valor_desconto_produto,
+            'valor_desconto_adicional': self.valor_desconto_adicional
+        }
+
 
     def __repr__(self):
         return "<DetalhesVenda %r>" % self.id
