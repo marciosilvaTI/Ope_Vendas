@@ -189,6 +189,7 @@ login -->
       document.getElementById('email').value = obj.email;
       document.getElementById('login').value = obj.login;
       $('#EditUsers').attr('action', route);
+      alert(obj.id_nivel_acesso_id)
     });
     $('#id_nivel_acesso_select').on('change', function () {
       document.getElementById('id_nivel_acesso_id').value = this.value

@@ -48,6 +48,15 @@ def index():
     return redirect(url_for('login'))
 
 
+@app.route("/template_base")
+def template_base():
+    return render_template("template_base.html")
+
+@app.route("/herda_template")
+def herda_template():
+    return render_template("herda_template.html")
+
+
 @app.route("/vendas_cadastradas")
 def vendas_cadastradas():
     vendas = Venda.query.all()
@@ -2248,3 +2257,28 @@ def deletar_item(id):
         db.session.commit()
         return json.dumps({"msg": "item deletado com sucesso!"})
     return json.dumps({"msg": 0})
+
+
+
+# @app.route("/add_tipo_pagamento")
+# @login_required
+# def add_tipo_pagamento():
+#     tipo_pagamento_dinheiro = TipoPagamento('DINHEIRO')
+#     tipo_pagamento_debito = TipoPagamento('DÉBITO')
+#     tipo_pagamento_credito = TipoPagamento('CRÉDITO')
+#     tipo_pagamento_a_prazo = TipoPagamento('A PRAZO')
+#     db.session.add(tipo_pagamento_dinheiro)
+#     db.session.add(tipo_pagamento_debito)
+#     db.session.add(tipo_pagamento_credito)
+#     db.session.add(tipo_pagamento_a_prazo)
+#     db.session.commit()
+#     return "OK"
+
+
+
+
+@app.route("/testeif")
+def testeif():
+    testeif = 200
+    return render_template('testeif.html', testeif=testeif)
+
